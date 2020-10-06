@@ -35,3 +35,11 @@ func MustParseTemplates() *template.Template {
 
 	return tpl
 }
+
+type IndexPage struct {
+	Page
+}
+
+type Page struct {
+	Title string
+}

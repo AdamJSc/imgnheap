@@ -1,5 +1,12 @@
 {{define "index"}}
     {{template "partial.header" .}}
-    <h1>Hello World</h1>
+    <div class="container file-upload">
+        <h1>Where are your images stored?</h1>
+        <p>Make sure it's the absolute path to the images directory on your local machine.</p>
+        <form method="post" action="/">
+            <p><input type="text" class="form-control" name="directory" /></p>
+            <p><button type="submit" class="cta">Begin</button></p>
+        </form>
+    </div>
     {{template "partial.footer" .}}
 {{end}}

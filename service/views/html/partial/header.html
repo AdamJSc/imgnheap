@@ -1,9 +1,49 @@
 {{define "partial.header"}}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Hello World</title>
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8">
+        <title>{{.Title}} | Imgnheap</title>
+        <style>
+            html {
+                font-family: Tahoma, Arial, Helvetica;
+                font-size: 18px;
+                color: #3c46ff;
+            }
+            .outer {
+                width: 100%;
+                padding: 20px;
+                text-align: center;
+                margin: 0 auto;
+            }
+            button.cta {
+                width: 100%;
+                font-size: 1.2rem;
+                background: #3c46ff;
+                color: #fff;
+                padding: 0.5rem;
+                border: 0;
+                border-radius: 5px;
+            }
+            button.cta:hover {
+                cursor: pointer;
+            }
+            input.form-control {
+                width: 100%;
+                font-size: 1rem;
+                box-sizing: border-box;
+                border: 2px solid #3c46ff;
+                border-radius: 5px;
+                padding: 0.5rem;
+            }
+            .container {
+                width: 700px;
+                margin: 0 auto;
+                overflow: hidden;
+                padding: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="outer">
 {{end}}
