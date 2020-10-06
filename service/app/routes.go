@@ -2,15 +2,12 @@ package app
 
 import (
 	"github.com/gorilla/mux"
-	"net/http"
 )
 
-func RegisterRouter() *mux.Router {
+func RegisterRouter(c Container) *mux.Router {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello World"))
-	})
+	r.HandleFunc("/", indexHandler(c))
 
 	return r
 }
