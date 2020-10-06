@@ -1,0 +1,17 @@
+{{define "catalog-method-selection"}}
+    {{template "partial.header" .}}
+    <div class="container catalog-method-selection">
+        <div class="start-again-container">
+            <form method="post" action="/reset">
+                <button type="submit" class="cta">Start Again</button>
+            </form>
+        </div>
+        <p>{{.ImageFilesCount}} image file(s) to process</p>
+        <h1>How would you like to catalog your images?</h1>
+        <form method="post" action="/catalog-by-date">
+            <button type="submit" class="cta">By Date</button>
+        </form>
+        <a href="/catalog-by-tag" class="cta">By Tag</a>
+    </div>
+    {{template "partial.footer" .}}
+{{end}}

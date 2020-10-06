@@ -47,6 +47,12 @@ type IndexPage struct {
 	Page
 }
 
+// CatalogMethodSelectionPage represents the dataset required by the catalog method seleciton page
+type CatalogMethodSelectionPage struct {
+	Page
+	ImageFilesCount int
+}
+
 // ErrorPage represents the dataset required by an error page
 type ErrorPage struct {
 	Page

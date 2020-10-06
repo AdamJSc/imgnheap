@@ -14,7 +14,26 @@ const sessionCookieName = "SESS_ID"
 
 func indexHandler(c Container) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		c.Templates().ExecuteTemplate(w, "index", views.IndexPage{Page: views.Page{Title: "Select Directory"}})
+		// is session cookie set?
+		_, err := r.Cookie(sessionCookieName)
+		if err != nil {
+			// nope it isn't!
+			c.Templates().ExecuteTemplate(w, "index", views.IndexPage{Page: views.Page{Title: "Enter your directory"}})
+			return
+		}
+
+		// TODO - check that session cookie ID is valid
+		// TODO - check that session cookie ID refers to a valid directory
+		// TODO - get image files count from directory
+		// TODO - ensure there's at least one file to process
+
+		imageFilesCount := 0
+
+		var data views.CatalogMethodSelectionPage
+		data.Title = "Select your catalog method"
+		data.ImageFilesCount = imageFilesCount
+
+		c.Templates().ExecuteTemplate(w, "catalog-method-selection", data)
 	}
 }
 
@@ -55,7 +74,6 @@ func newImagesDirectoryHandler(c Container) http.HandlerFunc {
 		})
 
 		// write location header
-		// TODO - amend location
 		w.Header().Set("Location", "/")
 		w.WriteHeader(http.StatusFound)
 	}
