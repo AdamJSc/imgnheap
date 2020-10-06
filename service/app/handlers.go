@@ -73,7 +73,22 @@ func newImagesDirectoryHandler(c Container) http.HandlerFunc {
 			Path:  "/",
 		})
 
-		// write location header
+		// redirect to home
+		w.Header().Set("Location", "/")
+		w.WriteHeader(http.StatusFound)
+	}
+}
+
+func resetHandler(c Container) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// delete session cookie
+		http.SetCookie(w, &http.Cookie{
+			Name:       sessionCookieName,
+			Path:       "/",
+			MaxAge:     -1,
+		})
+
+		// redirect to home
 		w.Header().Set("Location", "/")
 		w.WriteHeader(http.StatusFound)
 	}
