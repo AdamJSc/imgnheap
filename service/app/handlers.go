@@ -14,26 +14,7 @@ const sessionCookieName = "SESS_ID"
 
 func indexHandler(c Container) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// is session cookie set?
-		_, err := r.Cookie(sessionCookieName)
-		if err != nil {
-			// nope it isn't!
-			c.Templates().ExecuteTemplate(w, "index", views.IndexPage{Page: views.Page{Title: "Enter your directory"}})
-			return
-		}
-
-		// TODO - check that session cookie ID is valid
-		// TODO - check that session cookie ID refers to a valid directory
-		// TODO - get image files count from directory
-		// TODO - ensure there's at least one file to process
-
-		imageFilesCount := 0
-
-		var data views.CatalogMethodSelectionPage
-		data.Title = "Select your catalog method"
-		data.ImageFilesCount = imageFilesCount
-
-		c.Templates().ExecuteTemplate(w, "catalog-method-selection", data)
+		c.Templates().ExecuteTemplate(w, "index", views.IndexPage{Page: views.Page{Title: "Enter your directory"}})
 	}
 }
 
@@ -74,8 +55,23 @@ func newImagesDirectoryHandler(c Container) http.HandlerFunc {
 		})
 
 		// redirect to home
-		w.Header().Set("Location", "/")
+		w.Header().Set("Location", "/catalog")
 		w.WriteHeader(http.StatusFound)
+	}
+}
+
+func catalogMethodSelectionHandler(c Container) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// TODO - get image files count from directory
+		// TODO - ensure there's at least one file to process
+
+		imageFilesCount := 0
+
+		var data views.CatalogMethodSelectionPage
+		data.Title = "Select your catalog method"
+		data.ImageFilesCount = imageFilesCount
+
+		c.Templates().ExecuteTemplate(w, "catalog-method-selection", data)
 	}
 }
 
@@ -83,9 +79,9 @@ func resetHandler(c Container) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// delete session cookie
 		http.SetCookie(w, &http.Cookie{
-			Name:       sessionCookieName,
-			Path:       "/",
-			MaxAge:     -1,
+			Name:   sessionCookieName,
+			Path:   "/",
+			MaxAge: -1,
 		})
 
 		// redirect to home

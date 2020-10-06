@@ -9,9 +9,15 @@ import (
 func RegisterRouter(c Container) *mux.Router {
 	r := mux.NewRouter()
 
+	// routes that require no session token
 	r.HandleFunc("/", indexHandler(c)).Methods(http.MethodGet)
 	r.HandleFunc("/", newImagesDirectoryHandler(c)).Methods(http.MethodPost)
-	r.HandleFunc("/reset", resetHandler(c)).Methods(http.MethodPost)
+
+	// routes that require session token
+	s := r.PathPrefix("").Subrouter()
+	s.Use(sessionTokenIsValid(c))
+	s.HandleFunc("/catalog", catalogMethodSelectionHandler(c)).Methods(http.MethodGet)
+	s.HandleFunc("/reset", resetHandler(c)).Methods(http.MethodPost)
 
 	return r
 }
