@@ -6,11 +6,15 @@ import (
 	"imgnheap/service/app"
 	"imgnheap/service/views"
 	"log"
+	"math/rand"
 	"net/http"
 	"time"
 )
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	rand.Seed(time.Now().UnixNano())
+
 	c := container{
 		templates: views.MustParseTemplates(),
 	}

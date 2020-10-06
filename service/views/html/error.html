@@ -1,0 +1,9 @@
+{{define "error"}}
+    {{template "partial.header" .}}
+    <div class="container error">
+        <h1>{{.Error.Code}}</h1>
+        <h2>{{.Error.Message}}</h2>
+        <p>{{.Error.Detail}}</p>
+    </div>
+    {{template "partial.footer" .}}
+{{end}}

@@ -9,6 +9,7 @@ import (
 	"os"
 )
 
+// MustParseTemplates parses the HTML view templates, otherwise fails on error
 func MustParseTemplates() *template.Template {
 	tpl := template.New("imgnheap")
 
@@ -36,10 +37,22 @@ func MustParseTemplates() *template.Template {
 	return tpl
 }
 
+// Page represents the dataset required by a standard page template
+type Page struct {
+	Title string
+}
+
+// IndexPage represents the dataset required by the index page
 type IndexPage struct {
 	Page
 }
 
-type Page struct {
-	Title string
+// ErrorPage represents the dataset required by an error page
+type ErrorPage struct {
+	Page
+	Error struct {
+		Code    int
+		Message string
+		Detail  string
+	}
 }
