@@ -1,12 +1,13 @@
-package app
+package handlers
 
 import (
 	"github.com/gorilla/mux"
+	"imgnheap/service/app"
 	"net/http"
 )
 
 // RegisterRouter returns a new mux router with our handler routes attached
-func RegisterRouter(c Container) *mux.Router {
+func RegisterRouter(c app.Container) *mux.Router {
 	r := mux.NewRouter()
 
 	// routes that require no session token

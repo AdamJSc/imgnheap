@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"html/template"
 	"imgnheap/service/app"
+	"imgnheap/service/app/handlers"
+	"imgnheap/service/domain"
 	"imgnheap/service/views"
 	"log"
 	"math/rand"
@@ -17,10 +19,11 @@ func main() {
 
 	c := container{
 		templates: views.MustParseTemplates(),
+		store:     domain.NewInMemoryKeyValStore(),
 	}
 
 	port := 8080
-	router := app.RegisterRouter(c)
+	router := handlers.RegisterRouter(c)
 
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", port),
@@ -35,8 +38,13 @@ func main() {
 
 type container struct {
 	templates *template.Template
+	store     app.KeyValStore
 }
 
 func (c container) Templates() *template.Template {
 	return c.templates
+}
+
+func (c container) KeyValStore() app.KeyValStore {
+	return c.store
 }

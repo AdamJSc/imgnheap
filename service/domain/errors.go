@@ -13,3 +13,10 @@ type ValidationError struct{ Err error }
 func (v ValidationError) Error() string {
 	return v.Err.Error()
 }
+
+// NotFoundError represents an error that refers to an entity that cannot be found
+type NotFoundError struct{ Err error }
+
+func (n NotFoundError) Error() string {
+	return n.Err.Error()
+}

@@ -1,24 +1,22 @@
-package app
+package handlers
 
 import (
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
+	"imgnheap/service/app"
 	"imgnheap/service/domain"
 	"imgnheap/service/views"
 	"net/http"
 	"os"
 )
 
-const sessionCookieName = "SESS_ID"
-
-func indexHandler(c Container) http.HandlerFunc {
+func indexHandler(c app.Container) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		c.Templates().ExecuteTemplate(w, "index", views.IndexPage{Page: views.Page{Title: "Enter your directory"}})
 	}
 }
 
-func newImagesDirectoryHandler(c Container) http.HandlerFunc {
+func newImagesDirectoryHandler(c app.Container) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// get directory path
 		dirPath := r.FormValue("directory")
@@ -38,29 +36,26 @@ func newImagesDirectoryHandler(c Container) http.HandlerFunc {
 			return
 		}
 
-		// generate a new session ID
-		sessID, err := uuid.NewRandom()
+		sessAgent := &domain.SessionAgent{SessionAgentInjector: c}
+
+		// save new session + write cookie
+		sess, err := sessAgent.NewSessionWithValue(dirPath)
 		if err != nil {
 			handleError(err, c, w)
 			return
 		}
+		if err := sessAgent.WriteCookie(sess, w); err != nil {
+			handleError(err, c, w)
+			return
+		}
 
-		// TODO - save path against session ID
-
-		// write session cookie
-		http.SetCookie(w, &http.Cookie{
-			Name:  sessionCookieName,
-			Value: sessID.String(),
-			Path:  "/",
-		})
-
-		// redirect to home
+		// redirect to next step
 		w.Header().Set("Location", "/catalog")
 		w.WriteHeader(http.StatusFound)
 	}
 }
 
-func catalogMethodSelectionHandler(c Container) http.HandlerFunc {
+func catalogMethodSelectionHandler(c app.Container) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// TODO - get image files count from directory
 		// TODO - ensure there's at least one file to process
@@ -75,14 +70,11 @@ func catalogMethodSelectionHandler(c Container) http.HandlerFunc {
 	}
 }
 
-func resetHandler(c Container) http.HandlerFunc {
+func resetHandler(c app.Container) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// delete session cookie
-		http.SetCookie(w, &http.Cookie{
-			Name:   sessionCookieName,
-			Path:   "/",
-			MaxAge: -1,
-		})
+		sessAgent := domain.SessionAgent{SessionAgentInjector: c}
+		sessAgent.DeleteCookie(w)
 
 		// redirect to home
 		w.Header().Set("Location", "/")
@@ -91,7 +83,7 @@ func resetHandler(c Container) http.HandlerFunc {
 }
 
 // handleError handles the provided error and writes an appropriate error page
-func handleError(err error, c Container, w http.ResponseWriter) {
+func handleError(err error, c app.Container, w http.ResponseWriter) {
 	var code int
 	var msg string
 
