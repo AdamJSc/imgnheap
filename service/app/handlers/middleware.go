@@ -1,12 +1,17 @@
 package handlers
 
 import (
+	"context"
 	"imgnheap/service/app"
 	"imgnheap/service/domain"
 	"net/http"
 )
 
-func sessionTokenIsValid(c app.Container) func(http.Handler) http.Handler {
+const ctxDirPathKey = "DIR_PATH"
+
+// addDirPathToRequestContext provides a middleware method for adding the session's dir path to the request context
+// otherwise, redirects current request to home if no valid session has been found
+func addDirPathToRequestContext(c app.Container) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			sessAgent := domain.SessionAgent{SessionAgentInjector: c}
@@ -22,17 +27,21 @@ func sessionTokenIsValid(c app.Container) func(http.Handler) http.Handler {
 			sess, err := sessAgent.GetSessionFromToken(sessToken)
 			if err != nil {
 				// cookie value does not represent a valid session token
+				sessAgent.DeleteCookie(w)
 				redirectToHome(w)
 				return
 			}
 
 			if !fsAgent.IsDir(sess.DirPath) {
 				// dir path stored by session token does not represent a valid directory
+				sessAgent.DeleteCookie(w)
 				redirectToHome(w)
 				return
 			}
 
-			h.ServeHTTP(w, r)
+			// add dir path to request context
+			ctxWithDirPath := context.WithValue(r.Context(), ctxDirPathKey, sess.DirPath)
+			h.ServeHTTP(w, r.WithContext(ctxWithDirPath))
 		})
 	}
 }
@@ -41,4 +50,19 @@ func sessionTokenIsValid(c app.Container) func(http.Handler) http.Handler {
 func redirectToHome(w http.ResponseWriter) {
 	w.Header().Set("Location", "/")
 	w.WriteHeader(http.StatusFound)
+}
+
+// getDirPathFromRequest returns the dir path set on the request context by previous middleware
+func getDirPathFromRequest(r *http.Request) string {
+	val := r.Context().Value(ctxDirPathKey)
+	if val == nil {
+		return ""
+	}
+
+	dirPath, ok := val.(string)
+	if !ok {
+		return ""
+	}
+
+	return dirPath
 }

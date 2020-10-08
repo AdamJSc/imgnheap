@@ -16,7 +16,7 @@ func RegisterRouter(c app.Container) *mux.Router {
 
 	// routes that require session token
 	s := r.PathPrefix("").Subrouter()
-	s.Use(sessionTokenIsValid(c))
+	s.Use(addDirPathToRequestContext(c))
 	s.HandleFunc("/catalog", catalogMethodSelectionHandler(c)).Methods(http.MethodGet)
 	s.HandleFunc("/reset", resetHandler(c)).Methods(http.MethodPost)
 

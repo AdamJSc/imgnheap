@@ -11,7 +11,7 @@ import (
 
 func indexHandler(c app.Container) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		c.Templates().ExecuteTemplate(w, "index", views.IndexPage{Page: views.Page{Title: "Enter your directory"}})
+		c.Templates().ExecuteTemplate(w, "index", views.IndexPage{Page: views.NewPage("Enter your directory", "")})
 	}
 }
 
@@ -59,9 +59,10 @@ func catalogMethodSelectionHandler(c app.Container) http.HandlerFunc {
 
 		imageFilesCount := 0
 
-		var data views.CatalogMethodSelectionPage
-		data.Title = "Select your catalog method"
-		data.ImageFilesCount = imageFilesCount
+		data := views.CatalogMethodSelectionPage{
+			Page:            views.NewPage("Select your catalog method", getDirPathFromRequest(r)),
+			ImageFilesCount: imageFilesCount,
+		}
 
 		c.Templates().ExecuteTemplate(w, "catalog-method-selection", data)
 	}
@@ -72,10 +73,7 @@ func resetHandler(c app.Container) http.HandlerFunc {
 		// delete session cookie
 		sessAgent := domain.SessionAgent{SessionAgentInjector: c}
 		sessAgent.DeleteCookie(w)
-
-		// redirect to home
-		w.Header().Set("Location", "/")
-		w.WriteHeader(http.StatusFound)
+		redirectToHome(w)
 	}
 }
 
