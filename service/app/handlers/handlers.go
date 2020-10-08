@@ -39,7 +39,7 @@ func newImagesDirectoryHandler(c app.Container) http.HandlerFunc {
 		sessAgent := &domain.SessionAgent{SessionAgentInjector: c}
 
 		// save new session + write cookie
-		sess, err := sessAgent.NewSessionWithValue(dirPath)
+		sess, err := sessAgent.NewSessionWithDirPath(dirPath)
 		if err != nil {
 			handleError(err, c, w)
 			return

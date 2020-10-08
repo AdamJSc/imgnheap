@@ -11,8 +11,8 @@ const cookieName = "SESS_ID"
 
 // Session defines a basic key/value session
 type Session struct {
-	Token string
-	Value string
+	Token   string
+	DirPath string
 }
 
 type SessionAgentInjector interface {
@@ -24,8 +24,8 @@ type SessionAgent struct {
 	SessionAgentInjector
 }
 
-// NewSessionWithValue generates a new session, stores the provided value against it, and returns the token
-func (s *SessionAgent) NewSessionWithValue(val string) (*Session, error) {
+// NewSessionWithDirPath generates a new session, stores the provided directory path against it, and returns the token
+func (s *SessionAgent) NewSessionWithDirPath(dirPath string) (*Session, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {
 		return nil, err
@@ -33,13 +33,26 @@ func (s *SessionAgent) NewSessionWithValue(val string) (*Session, error) {
 
 	sessToken := id.String()
 
-	if err := s.KeyValStore().Write(sessToken, val); err != nil {
+	if err := s.KeyValStore().Write(sessToken, dirPath); err != nil {
 		return nil, err
 	}
 
 	return &Session{
-		Token: sessToken,
-		Value: val,
+		Token:   sessToken,
+		DirPath: dirPath,
+	}, nil
+}
+
+// GetSessionFromToken retrieves a Session object based on the provided token
+func (s *SessionAgent) GetSessionFromToken(sessToken string) (*Session, error) {
+	dirPath, err := s.KeyValStore().Read(sessToken)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Session{
+		Token:   sessToken,
+		DirPath: dirPath,
 	}, nil
 }
 
@@ -51,7 +64,7 @@ func (s *SessionAgent) WriteCookie(sess *Session, w http.ResponseWriter) error {
 
 	http.SetCookie(w, &http.Cookie{
 		Name:  cookieName,
-		Value: sess.Value,
+		Value: sess.Token,
 		Path:  "/",
 	})
 
@@ -67,11 +80,12 @@ func (s *SessionAgent) DeleteCookie(w http.ResponseWriter) {
 	})
 }
 
-// IsSet returns true if session cookie is set, otherwise false
-func (s *SessionAgent) IsSet(r *http.Request) bool {
+// GetTokenFromCookie returns string value of session cookie, or empty string if missing
+func (s *SessionAgent) GetTokenFromCookie(r *http.Request) string {
 	cookie, err := r.Cookie(cookieName)
 	if err != nil || cookie == nil {
-		return false
+		return ""
 	}
-	return true
+
+	return cookie.Value
 }
