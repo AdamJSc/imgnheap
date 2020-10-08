@@ -47,7 +47,12 @@ func addDirPathToRequestContext(c app.Container) func(http.Handler) http.Handler
 
 // redirectToHome writes a redirection to the provided response writer
 func redirectToHome(w http.ResponseWriter) {
-	w.Header().Set("Location", "/")
+	redirect(w, "/")
+}
+
+// redirect writes to the provided response writer a redirection to the provided location
+func redirect(w http.ResponseWriter, location string) {
+	w.Header().Set("Location", location)
 	w.WriteHeader(http.StatusFound)
 }
 

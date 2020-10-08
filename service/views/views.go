@@ -39,15 +39,17 @@ func MustParseTemplates() *template.Template {
 
 // Page represents the dataset required by a standard page template
 type Page struct {
-	Title   string
-	DirPath string
+	Title          string
+	DirPath        string
+	WithStartAgain bool
 }
 
 // NewPage returns a new Page object
-func NewPage(title, dirPath string) Page {
+func NewPage(title, dirPath string, withStartAgain bool) Page {
 	return Page{
-		Title:   title,
-		DirPath: dirPath,
+		Title:          title,
+		DirPath:        dirPath,
+		WithStartAgain: withStartAgain,
 	}
 }
 

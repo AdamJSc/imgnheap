@@ -11,7 +11,7 @@ import (
 
 func indexHandler(c app.Container) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		c.Templates().ExecuteTemplate(w, "index", views.IndexPage{Page: views.NewPage("Enter your directory", "")})
+		c.Templates().ExecuteTemplate(w, "index", views.IndexPage{Page: views.NewPage("Enter your directory", "", false)})
 	}
 }
 
@@ -46,8 +46,7 @@ func newImagesDirectoryHandler(c app.Container) http.HandlerFunc {
 		}
 
 		// redirect to next step
-		w.Header().Set("Location", "/catalog")
-		w.WriteHeader(http.StatusFound)
+		redirect(w, "/catalog")
 	}
 }
 
@@ -61,8 +60,9 @@ func catalogMethodSelectionHandler(c app.Container) http.HandlerFunc {
 
 		imgFiles := domain.FilterFilesByExtensions(files, domain.ImgFileExts...)
 
+		dirPath := getDirPathFromRequest(r)
 		data := views.CatalogMethodSelectionPage{
-			Page:            views.NewPage("Select your catalog method", getDirPathFromRequest(r)),
+			Page:            views.NewPage("Select your catalog method", dirPath, dirPath != ""),
 			ImageFilesCount: len(imgFiles),
 		}
 
@@ -96,8 +96,9 @@ func handleError(err error, c app.Container, w http.ResponseWriter) {
 		msg = "Internal Server Error"
 	}
 
-	var data views.ErrorPage
-	data.Title = msg
+	data := views.ErrorPage{
+		Page: views.NewPage(msg, "", true),
+	}
 	data.Error.Code = code
 	data.Error.Message = msg
 	data.Error.Detail = err.Error()

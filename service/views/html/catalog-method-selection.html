@@ -1,11 +1,6 @@
 {{define "catalog-method-selection"}}
     {{template "partial.header" .}}
-    <div class="container catalog-method-selection">
-        <div class="start-again-container">
-            <form method="post" action="/reset">
-                <button type="submit" class="cta">Start Again</button>
-            </form>
-        </div>
+    <div class="content catalog-method-selection">
         {{if .ImageFilesCount}}
             <p class="bold">{{.DirPath}}</p>
             <p>Found {{.ImageFilesCount}} image file(s) to process</p>

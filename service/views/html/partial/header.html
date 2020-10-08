@@ -48,7 +48,7 @@
                 overflow: hidden;
                 padding: 5px;
             }
-            .start-again-container {
+            .content.start-again {
                 width: 200px;
             }
             .errors {
@@ -63,4 +63,12 @@
     </head>
     <body>
         <div class="outer">
+            <div class="container">
+                {{if .WithStartAgain}}
+                <div class="content start-again">
+                    <form method="post" action="/reset">
+                        <button type="submit" class="cta">Start Again</button>
+                    </form>
+                </div>
+                {{end}}
 {{end}}
