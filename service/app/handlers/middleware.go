@@ -15,7 +15,6 @@ func addDirPathToRequestContext(c app.Container) func(http.Handler) http.Handler
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			sessAgent := domain.SessionAgent{SessionAgentInjector: c}
-			fsAgent := domain.FileSystemAgent{FileSystemAgentInjector: c}
 
 			sessToken := sessAgent.GetTokenFromCookie(r)
 			if sessToken == "" {
@@ -32,7 +31,7 @@ func addDirPathToRequestContext(c app.Container) func(http.Handler) http.Handler
 				return
 			}
 
-			if !fsAgent.IsDir(sess.DirPath) {
+			if !c.FileSystem().IsDirectory(sess.DirPath) {
 				// dir path stored by session token does not represent a valid directory
 				sessAgent.DeleteCookie(w)
 				redirectToHome(w)

@@ -18,7 +18,6 @@ func indexHandler(c app.Container) http.HandlerFunc {
 func newImagesDirectoryHandler(c app.Container) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		sessAgent := &domain.SessionAgent{SessionAgentInjector: c}
-		fsAgent := domain.FileSystemAgent{FileSystemAgentInjector: c}
 
 		// get directory path from request
 		dirPath := r.FormValue("directory")
@@ -28,7 +27,7 @@ func newImagesDirectoryHandler(c app.Container) http.HandlerFunc {
 		}
 
 		// does directory exist?
-		if !fsAgent.IsDir(dirPath) {
+		if !c.FileSystem().IsDirectory(dirPath) {
 			handleError(domain.ValidationError{Err: fmt.Errorf("not a directory: %s", dirPath)}, c, w)
 			return
 		}
@@ -54,14 +53,17 @@ func newImagesDirectoryHandler(c app.Container) http.HandlerFunc {
 
 func catalogMethodSelectionHandler(c app.Container) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// TODO - get image files count from directory
-		// TODO - ensure there's at least one file to process
+		files, err := c.FileSystem().GetFilesInDirectory(getDirPathFromRequest(r))
+		if err != nil {
+			handleError(err, c, w)
+			return
+		}
 
-		imageFilesCount := 0
+		imgFiles := domain.FilterFilesByExtensions(files, domain.ImgFileExts...)
 
 		data := views.CatalogMethodSelectionPage{
 			Page:            views.NewPage("Select your catalog method", getDirPathFromRequest(r)),
-			ImageFilesCount: imageFilesCount,
+			ImageFilesCount: len(imgFiles),
 		}
 
 		c.Templates().ExecuteTemplate(w, "catalog-method-selection", data)

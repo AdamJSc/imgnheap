@@ -7,7 +7,7 @@
             </form>
         </div>
         {{if .ImageFilesCount}}
-            <p>{{.DirPath}}</p>
+            <p class="bold">{{.DirPath}}</p>
             <p>Found {{.ImageFilesCount}} image file(s) to process</p>
             <h1>How would you like to catalog your images?</h1>
             <form method="post" action="/catalog/by-date">
@@ -15,7 +15,7 @@
             </form>
             <a href="/catalog/by-tag" class="cta">By Custom Tags</a>
         {{else}}
-            <div class="errors">
+            <div class="errors bold">
                 <p>{{.DirPath}}</p>
                 <p>No images found to process :(</p>
                 <p>Please select "Start Again" and specify an alternative directory</p>

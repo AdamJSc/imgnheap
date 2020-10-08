@@ -2,6 +2,7 @@ package app
 
 import (
 	"html/template"
+	"imgnheap/service/models"
 )
 
 // Container defines our app's container interface
@@ -23,5 +24,6 @@ type KeyValStore interface {
 
 // FileSystem defines operations for transacting with a file system
 type FileSystem interface {
-	IsDir(path string) bool
+	IsDirectory(path string) bool
+	GetFilesInDirectory(path string) ([]models.File, error)
 }
