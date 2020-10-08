@@ -1,13 +1,17 @@
 package domain
 
-import "fmt"
+import (
+	"fmt"
+	"imgnheap/service/app"
+)
 
 // InMemoryKeyValStore defines an in-memory key/value store
 type InMemoryKeyValStore struct {
+	app.KeyValStore
 	mem map[string]string
 }
 
-// Read implements KeyValStore.Read()
+// Read implements app.KeyValStore.Read()
 func (i *InMemoryKeyValStore) Read(key string) (string, error) {
 	val, ok := i.mem[key]
 	if !ok {
@@ -17,7 +21,7 @@ func (i *InMemoryKeyValStore) Read(key string) (string, error) {
 	return val, nil
 }
 
-// Write implements KeyValStore.Write()
+// Write implements app.KeyValStore.Write()
 func (i *InMemoryKeyValStore) Write(key string, val string) error {
 	i.mem[key] = val
 	return nil

@@ -7,7 +7,6 @@ import (
 	"imgnheap/service/domain"
 	"imgnheap/service/views"
 	"net/http"
-	"os"
 )
 
 func indexHandler(c app.Container) http.HandlerFunc {
@@ -18,7 +17,10 @@ func indexHandler(c app.Container) http.HandlerFunc {
 
 func newImagesDirectoryHandler(c app.Container) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// get directory path
+		sessAgent := &domain.SessionAgent{SessionAgentInjector: c}
+		fsAgent := domain.FileSystemAgent{FileSystemAgentInjector: c}
+
+		// get directory path from request
 		dirPath := r.FormValue("directory")
 		if dirPath == "" {
 			handleError(domain.BadRequestError{Err: errors.New("missing field: directory")}, c, w)
@@ -26,24 +28,19 @@ func newImagesDirectoryHandler(c app.Container) http.HandlerFunc {
 		}
 
 		// does directory exist?
-		fi, err := os.Stat(dirPath)
-		if err != nil {
-			handleError(domain.ValidationError{Err: fmt.Errorf("directory does not exist: %s", dirPath)}, c, w)
-			return
-		}
-		if !fi.IsDir() {
+		if !fsAgent.IsDir(dirPath) {
 			handleError(domain.ValidationError{Err: fmt.Errorf("not a directory: %s", dirPath)}, c, w)
 			return
 		}
 
-		sessAgent := &domain.SessionAgent{SessionAgentInjector: c}
-
-		// save new session + write cookie
+		// save new session
 		sess, err := sessAgent.NewSessionWithDirPath(dirPath)
 		if err != nil {
 			handleError(err, c, w)
 			return
 		}
+
+		// write cookie
 		if err := sessAgent.WriteCookie(sess, w); err != nil {
 			handleError(err, c, w)
 			return

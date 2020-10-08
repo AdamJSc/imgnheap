@@ -20,6 +20,7 @@ func main() {
 	c := container{
 		templates: views.MustParseTemplates(),
 		store:     domain.NewInMemoryKeyValStore(),
+		fs:        &domain.OsFileSystem{},
 	}
 
 	port := 8080
@@ -39,6 +40,7 @@ func main() {
 type container struct {
 	templates *template.Template
 	store     app.KeyValStore
+	fs        app.FileSystem
 }
 
 func (c container) Templates() *template.Template {
@@ -47,4 +49,8 @@ func (c container) Templates() *template.Template {
 
 func (c container) KeyValStore() app.KeyValStore {
 	return c.store
+}
+
+func (c container) FileSystem() app.FileSystem {
+	return c.fs
 }

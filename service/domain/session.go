@@ -15,6 +15,7 @@ type Session struct {
 	DirPath string
 }
 
+// SessionAgentInjector defines the injector behaviours for our SessionAgent
 type SessionAgentInjector interface {
 	app.KeyValStoreInjector
 }
