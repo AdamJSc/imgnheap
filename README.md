@@ -2,7 +2,7 @@
 
 ## About
 
-Bulk-process your heap of images into lovely subfolders, by way of a local Web UI
+Bulk-process your heap of images into lovely sub-folders, by way of a local Web UI
 
 ## Requirements
 
@@ -24,4 +24,12 @@ From project root:
 
 ```
 pkger -o service/views
+```
+
+## Running Tests
+
+From project root:
+
+```
+go test ./...
 ```
