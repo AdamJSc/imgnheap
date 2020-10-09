@@ -17,7 +17,7 @@ func indexHandler(c app.Container) http.HandlerFunc {
 
 func newImagesDirectoryHandler(c app.Container) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		sessAgent := &domain.SessionAgent{SessionAgentInjector: c}
+		sessAgent := domain.SessionAgent{SessionAgentInjector: c}
 
 		// get directory path from request
 		dirPath := r.FormValue("directory")

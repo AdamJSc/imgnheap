@@ -35,12 +35,12 @@ func (o *OsFileSystem) GetFilesInDirectory(dirPath string) ([]models.File, error
 			return nil
 		}
 
-		fname := info.Name()
-		fnameParts := strings.Split(fname, ".")
-		ext := fnameParts[len(fnameParts)-1]
+		fileName, ext := ParseFileNameAndExtensionFromInfo(info)
+
 		files = append(files, models.File{
-			Name: fname,
-			Ext:  ext,
+			Name:      fileName,
+			Ext:       ext,
+			CreatedAt: info.ModTime(),
 		})
 
 		return nil
@@ -49,6 +49,20 @@ func (o *OsFileSystem) GetFilesInDirectory(dirPath string) ([]models.File, error
 	}
 
 	return files, nil
+}
+
+// ParseFileNameAndExtensionFromInfo returns the filename and extension from the provided file info object
+func ParseFileNameAndExtensionFromInfo(info os.FileInfo) (string, string) {
+	var ext string
+	fileName := info.Name()
+	fileNameParts := strings.Split(fileName, ".")
+
+	if len(fileNameParts) > 1 {
+		fileName = strings.Join(fileNameParts[0:len(fileNameParts)-1], ".")
+		ext = fileNameParts[len(fileNameParts)-1]
+	}
+
+	return fileName, ext
 }
 
 // filterFilesByExtensions returns the provided files filtered to retain only those whose extension matches one of the provided extensions
