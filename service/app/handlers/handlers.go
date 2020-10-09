@@ -52,13 +52,13 @@ func newImagesDirectoryHandler(c app.Container) http.HandlerFunc {
 
 func catalogMethodSelectionHandler(c app.Container) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		files, err := c.FileSystem().GetFilesInDirectory(getDirPathFromRequest(r))
+		imgAgent := domain.ImagesAgent{ImagesAgentInjector: c}
+
+		imgFiles, err := imgAgent.GetImageFilesFromDirectory(getDirPathFromRequest(r))
 		if err != nil {
 			handleError(err, c, w)
 			return
 		}
-
-		imgFiles := domain.FilterFilesByExtensions(files, domain.ImgFileExts...)
 
 		dirPath := getDirPathFromRequest(r)
 		data := views.CatalogMethodSelectionPage{

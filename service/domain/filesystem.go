@@ -8,12 +8,6 @@ import (
 	"strings"
 )
 
-var ImgFileExts = []string{
-	"png",
-	"jpg",
-	"jpeg",
-}
-
 // OsFileSystem defines the OS implementation of FileSystem
 type OsFileSystem struct {
 	app.FileSystem
@@ -57,8 +51,8 @@ func (o *OsFileSystem) GetFilesInDirectory(dirPath string) ([]models.File, error
 	return files, nil
 }
 
-// FilterFilesByExtensions returns the provided files filtered to retain only those whose extension matches one of the provided extensions
-func FilterFilesByExtensions(files []models.File, exts ...string) []models.File {
+// filterFilesByExtensions returns the provided files filtered to retain only those whose extension matches one of the provided extensions
+func filterFilesByExtensions(files []models.File, exts ...string) []models.File {
 	var filtered []models.File
 
 	for _, file := range files {
