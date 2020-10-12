@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"errors"
-	"fmt"
 	"imgnheap/service/app"
 	"imgnheap/service/domain"
 	"imgnheap/service/views"
@@ -16,25 +14,12 @@ func indexHandler(c app.Container) http.HandlerFunc {
 	}
 }
 
-func newImagesDirectoryHandler(c app.Container) http.HandlerFunc {
+func newSessionHandler(c app.Container) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		sessAgent := domain.SessionAgent{SessionAgentInjector: c}
 
-		// get directory path from request
-		dirPath := r.FormValue("directory")
-		if dirPath == "" {
-			handleError(domain.BadRequestError{Err: errors.New("missing field: directory")}, c, w)
-			return
-		}
-
-		// does directory exist?
-		if !c.FileSystem().IsDirectory(dirPath) {
-			handleError(domain.ValidationError{Err: fmt.Errorf("not a directory: %s", dirPath)}, c, w)
-			return
-		}
-
 		// save new session
-		sess, err := sessAgent.NewSessionWithDirPathAndTimestamp(dirPath, time.Now())
+		sess, err := sessAgent.NewSessionFromRequestAndTimestamp(r, time.Now())
 		if err != nil {
 			handleError(err, c, w)
 			return

@@ -12,7 +12,7 @@ func RegisterRouter(c app.Container) *mux.Router {
 
 	// routes that require no session token
 	r.HandleFunc("/", indexHandler(c)).Methods(http.MethodGet)
-	r.HandleFunc("/", newImagesDirectoryHandler(c)).Methods(http.MethodPost)
+	r.HandleFunc("/", newSessionHandler(c)).Methods(http.MethodPost)
 
 	// routes that require session token
 	s := r.PathPrefix("").Subrouter()

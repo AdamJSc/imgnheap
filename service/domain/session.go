@@ -26,6 +26,7 @@ func (s *Session) FullDir() string {
 
 // SessionAgentInjector defines the injector behaviours for our SessionAgent
 type SessionAgentInjector interface {
+	app.FileSystemInjector
 	app.KeyValStoreInjector
 }
 
@@ -34,21 +35,32 @@ type SessionAgent struct {
 	SessionAgentInjector
 }
 
-// NewSessionWithDirPathAndTimestamp generates a new session, stores the provided directory path and timestamp against it, and returns the token
-func (s *SessionAgent) NewSessionWithDirPathAndTimestamp(dirPath string, ts time.Time) (*Session, error) {
+// NewSessionFromRequestAndTimestamp generates a new session based on the provided request object and timestamp, and returns the session
+func (s *SessionAgent) NewSessionFromRequestAndTimestamp(r *http.Request, ts time.Time) (*Session, error) {
+	// get directory path from request
+	dirPath := r.FormValue("directory")
+	if dirPath == "" {
+		return nil, BadRequestError{Err: errors.New("missing field: directory")}
+	}
+
+	// does directory exist?
+	if !s.FileSystem().IsDirectory(dirPath) {
+		return nil, ValidationError{Err: fmt.Errorf("not a directory: %s", dirPath)}
+	}
+
+	// generate new session token
 	id, err := uuid.NewRandom()
 	if err != nil {
 		return nil, err
 	}
-
 	sessToken := id.String()
 
+	// create session object
 	sess := &Session{
 		Token:   sessToken,
 		BaseDir: dirPath,
 		SubDir:  fmt.Sprintf("processed%s", ts.Format("20060102150405")),
 	}
-
 	if err := s.KeyValStore().Write(sessToken, sess); err != nil {
 		return nil, err
 	}
