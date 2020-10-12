@@ -18,8 +18,8 @@ type FileSystemInjector interface{ FileSystem() FileSystem }
 
 // KeyValStore defines operations for transacting with key/value storage
 type KeyValStore interface {
-	Read(key string) (string, error)
-	Write(key string, val string) error
+	Read(key string) (interface{}, error)
+	Write(key string, val interface{}) error
 }
 
 // FileSystem defines operations for transacting with a file system

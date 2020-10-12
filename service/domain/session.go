@@ -2,9 +2,12 @@ package domain
 
 import (
 	"errors"
+	"fmt"
 	"github.com/google/uuid"
 	"imgnheap/service/app"
 	"net/http"
+	"path"
+	"time"
 )
 
 const cookieName = "SESS_ID"
@@ -12,7 +15,13 @@ const cookieName = "SESS_ID"
 // Session defines a basic key/value session
 type Session struct {
 	Token   string
-	DirPath string
+	BaseDir string
+	SubDir  string
+}
+
+// FullDir returns the full directory stored by the Session
+func (s *Session) FullDir() string {
+	return path.Join(s.BaseDir, s.SubDir)
 }
 
 // SessionAgentInjector defines the injector behaviours for our SessionAgent
@@ -25,8 +34,8 @@ type SessionAgent struct {
 	SessionAgentInjector
 }
 
-// NewSessionWithDirPath generates a new session, stores the provided directory path against it, and returns the token
-func (s *SessionAgent) NewSessionWithDirPath(dirPath string) (*Session, error) {
+// NewSessionWithDirPathAndTimestamp generates a new session, stores the provided directory path and timestamp against it, and returns the token
+func (s *SessionAgent) NewSessionWithDirPathAndTimestamp(dirPath string, ts time.Time) (*Session, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {
 		return nil, err
@@ -34,27 +43,32 @@ func (s *SessionAgent) NewSessionWithDirPath(dirPath string) (*Session, error) {
 
 	sessToken := id.String()
 
-	if err := s.KeyValStore().Write(sessToken, dirPath); err != nil {
+	sess := &Session{
+		Token:   sessToken,
+		BaseDir: dirPath,
+		SubDir:  fmt.Sprintf("processed%s", ts.Format("20060102150405")),
+	}
+
+	if err := s.KeyValStore().Write(sessToken, sess); err != nil {
 		return nil, err
 	}
 
-	return &Session{
-		Token:   sessToken,
-		DirPath: dirPath,
-	}, nil
+	return sess, nil
 }
 
 // GetSessionFromToken retrieves a Session object based on the provided token
 func (s *SessionAgent) GetSessionFromToken(sessToken string) (*Session, error) {
-	dirPath, err := s.KeyValStore().Read(sessToken)
+	val, err := s.KeyValStore().Read(sessToken)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Session{
-		Token:   sessToken,
-		DirPath: dirPath,
-	}, nil
+	sess, ok := val.(*Session)
+	if !ok {
+		return nil, fmt.Errorf("error token %s does not represents session object", sessToken)
+	}
+
+	return sess, nil
 }
 
 // WriteCookie writes the provided session as a cookie to the provided writer

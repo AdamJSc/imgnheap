@@ -7,6 +7,7 @@ import (
 	"imgnheap/service/domain"
 	"imgnheap/service/views"
 	"net/http"
+	"time"
 )
 
 func indexHandler(c app.Container) http.HandlerFunc {
@@ -33,7 +34,7 @@ func newImagesDirectoryHandler(c app.Container) http.HandlerFunc {
 		}
 
 		// save new session
-		sess, err := sessAgent.NewSessionWithDirPath(dirPath)
+		sess, err := sessAgent.NewSessionWithDirPathAndTimestamp(dirPath, time.Now())
 		if err != nil {
 			handleError(err, c, w)
 			return
