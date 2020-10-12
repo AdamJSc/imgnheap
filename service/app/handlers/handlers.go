@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"imgnheap/service/app"
 	"imgnheap/service/domain"
 	"imgnheap/service/views"
@@ -38,15 +39,21 @@ func newSessionHandler(c app.Container) http.HandlerFunc {
 
 func catalogMethodSelectionHandler(c app.Container) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		imgAgent := domain.ImagesAgent{ImagesAgentInjector: c}
+		fsAgent := domain.FileSystemAgent{FileSystemAgentInjector: c}
 
-		imgFiles, err := imgAgent.GetImageFilesFromDirectory(getDirPathFromRequest(r))
+		sess := getSessionFromRequest(r)
+		if sess == nil {
+			handleError(errors.New("session is nil"), c, w)
+			return
+		}
+		dirPath := sess.BaseDir
+
+		imgFiles, err := fsAgent.GetFilesFromDirectoryByExtension(dirPath, domain.ImgFileExts...)
 		if err != nil {
 			handleError(err, c, w)
 			return
 		}
 
-		dirPath := getDirPathFromRequest(r)
 		data := views.CatalogMethodSelectionPage{
 			Page:            views.NewPage("Select your catalog method", dirPath, dirPath != ""),
 			ImageFilesCount: len(imgFiles),

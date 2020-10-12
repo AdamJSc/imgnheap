@@ -7,11 +7,11 @@ import (
 	"net/http"
 )
 
-const ctxDirPathKey = "DIR_PATH"
+const ctxSessionKey = "CTX_SESSION"
 
-// addDirPathToRequestContext provides a middleware method for adding the session's dir path to the request context
+// addSessionToRequestContext provides a middleware method for adding the session to the request context
 // otherwise, redirects current request to home if no valid session has been found
-func addDirPathToRequestContext(c app.Container) func(http.Handler) http.Handler {
+func addSessionToRequestContext(c app.Container) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			sessAgent := domain.SessionAgent{SessionAgentInjector: c}
@@ -38,8 +38,8 @@ func addDirPathToRequestContext(c app.Container) func(http.Handler) http.Handler
 				return
 			}
 
-			// add dir path to request context
-			ctxWithDirPath := context.WithValue(r.Context(), ctxDirPathKey, sess.BaseDir)
+			// add session to request context
+			ctxWithDirPath := context.WithValue(r.Context(), ctxSessionKey, sess)
 			h.ServeHTTP(w, r.WithContext(ctxWithDirPath))
 		})
 	}
@@ -56,17 +56,17 @@ func redirect(w http.ResponseWriter, location string) {
 	w.WriteHeader(http.StatusFound)
 }
 
-// getDirPathFromRequest returns the dir path set on the request context by previous middleware
-func getDirPathFromRequest(r *http.Request) string {
-	val := r.Context().Value(ctxDirPathKey)
+// getSessionFromRequest returns the session set on the request context by previous middleware
+func getSessionFromRequest(r *http.Request) *domain.Session {
+	val := r.Context().Value(ctxSessionKey)
 	if val == nil {
-		return ""
+		return nil
 	}
 
-	dirPath, ok := val.(string)
+	sess, ok := val.(*domain.Session)
 	if !ok {
-		return ""
+		return nil
 	}
 
-	return dirPath
+	return sess
 }
