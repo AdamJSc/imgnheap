@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"imgnheap/service/app"
 	"imgnheap/service/domain"
 	"imgnheap/service/views"
@@ -69,6 +70,35 @@ func resetHandler(c app.Container) http.HandlerFunc {
 		sessAgent := domain.SessionAgent{SessionAgentInjector: c}
 		sessAgent.DeleteCookie(w)
 		redirectToHome(w)
+	}
+}
+
+func processFilesByDateInFilename(c app.Container) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		sess := getSessionFromRequest(r)
+		if sess == nil {
+			handleError(errors.New("session is nil"), c, w)
+			return
+		}
+
+		fsAgent := domain.FileSystemAgent{FileSystemAgentInjector: c}
+
+		files, err := fsAgent.GetFilesFromDirectoryByExtension(sess.BaseDir, domain.ImgFileExts...)
+		if err != nil {
+			handleError(err, c, w)
+			return
+		}
+
+		for _, file := range files {
+			destDir := domain.GetDestinationDirFromFileTimestampAndSession(file, sess)
+			if err := fsAgent.ProcessFileByCopy(file, sess.BaseDir, destDir); err != nil {
+				handleError(err, c, w)
+				return
+			}
+		}
+
+		// TODO - execute template
+		w.Write([]byte(fmt.Sprintf("processed %d files in %s", len(files), sess.FullDir())))
 	}
 }
 

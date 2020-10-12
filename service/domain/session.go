@@ -47,7 +47,7 @@ func (s *SessionAgent) NewSessionFromRequestAndTimestamp(r *http.Request, ts tim
 	sess := &models.Session{
 		Token:   sessToken,
 		BaseDir: dirPath,
-		SubDir:  fmt.Sprintf("processed%s", ts.Format("20060102150405")),
+		SubDir:  fmt.Sprintf("imgnheap%s", ts.Format("20060102150405")),
 	}
 	if err := s.KeyValStore().Write(sessToken, sess); err != nil {
 		return nil, err

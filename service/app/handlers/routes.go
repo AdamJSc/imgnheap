@@ -18,6 +18,7 @@ func RegisterRouter(c app.Container) *mux.Router {
 	s := r.PathPrefix("").Subrouter()
 	s.Use(addSessionToRequestContext(c))
 	s.HandleFunc("/catalog", catalogMethodSelectionHandler(c)).Methods(http.MethodGet)
+	s.HandleFunc("/catalog/by-date", processFilesByDateInFilename(c)).Methods(http.MethodPost)
 	s.HandleFunc("/reset", resetHandler(c)).Methods(http.MethodPost)
 
 	return r

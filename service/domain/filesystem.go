@@ -4,6 +4,7 @@ import (
 	"imgnheap/service/app"
 	"imgnheap/service/models"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -70,8 +71,8 @@ type FileSystemAgent struct {
 }
 
 // GetFilesFromDirectoryByExtension returns a slice of the files present within the provided directory path
-func (i *FileSystemAgent) GetFilesFromDirectoryByExtension(dir string, exts ...string) ([]models.File, error) {
-	files, err := i.FileSystem().GetFilesInDirectory(dir)
+func (f *FileSystemAgent) GetFilesFromDirectoryByExtension(dir string, exts ...string) ([]models.File, error) {
+	files, err := f.FileSystem().GetFilesInDirectory(dir)
 	if err != nil {
 		return nil, err
 	}
@@ -85,6 +86,12 @@ func (i *FileSystemAgent) GetFilesFromDirectoryByExtension(dir string, exts ...s
 	}
 
 	return filtered, nil
+}
+
+// ProcessFileByCopy copies the provided file from the provided source directory to the provided destination directory
+func (f *FileSystemAgent) ProcessFileByCopy(file models.File, sourceDir, destDir string) error {
+	// TODO - implement me
+	return nil
 }
 
 // ParseFileNameAndExtensionFromInfo returns the filename and extension from the provided file info object
@@ -145,6 +152,11 @@ func ParseTimestampFromFile(file models.File) time.Time {
 	// filename could not be parsed by any of the expected patterns
 	// so let's default to the created date instead
 	return file.CreatedAt
+}
+
+// GetDestinationDirFromFileTimestampAndSession returns a directory based on the timestamp parsed from the provided file, and the provided session
+func GetDestinationDirFromFileTimestampAndSession(file models.File, sess *models.Session) string {
+	return path.Join(sess.FullDir(), ParseTimestampFromFile(file).Format("2006-01-02"))
 }
 
 // contains returns true if the provided needle exists within the provided haystack, otherwise false
