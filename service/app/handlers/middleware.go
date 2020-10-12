@@ -4,6 +4,7 @@ import (
 	"context"
 	"imgnheap/service/app"
 	"imgnheap/service/domain"
+	"imgnheap/service/models"
 	"net/http"
 )
 
@@ -57,13 +58,13 @@ func redirect(w http.ResponseWriter, location string) {
 }
 
 // getSessionFromRequest returns the session set on the request context by previous middleware
-func getSessionFromRequest(r *http.Request) *domain.Session {
+func getSessionFromRequest(r *http.Request) *models.Session {
 	val := r.Context().Value(ctxSessionKey)
 	if val == nil {
 		return nil
 	}
 
-	sess, ok := val.(*domain.Session)
+	sess, ok := val.(*models.Session)
 	if !ok {
 		return nil
 	}

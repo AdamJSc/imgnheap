@@ -5,24 +5,12 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"imgnheap/service/app"
+	"imgnheap/service/models"
 	"net/http"
-	"path"
 	"time"
 )
 
 const cookieName = "SESS_ID"
-
-// Session defines a basic key/value session
-type Session struct {
-	Token   string
-	BaseDir string
-	SubDir  string
-}
-
-// FullDir returns the full directory stored by the Session
-func (s *Session) FullDir() string {
-	return path.Join(s.BaseDir, s.SubDir)
-}
 
 // SessionAgentInjector defines the injector behaviours for our SessionAgent
 type SessionAgentInjector interface {
@@ -36,7 +24,7 @@ type SessionAgent struct {
 }
 
 // NewSessionFromRequestAndTimestamp generates a new session based on the provided request object and timestamp, and returns the session
-func (s *SessionAgent) NewSessionFromRequestAndTimestamp(r *http.Request, ts time.Time) (*Session, error) {
+func (s *SessionAgent) NewSessionFromRequestAndTimestamp(r *http.Request, ts time.Time) (*models.Session, error) {
 	// get directory path from request
 	dirPath := r.FormValue("directory")
 	if dirPath == "" {
@@ -56,7 +44,7 @@ func (s *SessionAgent) NewSessionFromRequestAndTimestamp(r *http.Request, ts tim
 	sessToken := id.String()
 
 	// create session object
-	sess := &Session{
+	sess := &models.Session{
 		Token:   sessToken,
 		BaseDir: dirPath,
 		SubDir:  fmt.Sprintf("processed%s", ts.Format("20060102150405")),
@@ -69,13 +57,13 @@ func (s *SessionAgent) NewSessionFromRequestAndTimestamp(r *http.Request, ts tim
 }
 
 // GetSessionFromToken retrieves a Session object based on the provided token
-func (s *SessionAgent) GetSessionFromToken(sessToken string) (*Session, error) {
+func (s *SessionAgent) GetSessionFromToken(sessToken string) (*models.Session, error) {
 	val, err := s.KeyValStore().Read(sessToken)
 	if err != nil {
 		return nil, err
 	}
 
-	sess, ok := val.(*Session)
+	sess, ok := val.(*models.Session)
 	if !ok {
 		return nil, fmt.Errorf("error token %s does not represents session object", sessToken)
 	}
@@ -84,7 +72,7 @@ func (s *SessionAgent) GetSessionFromToken(sessToken string) (*Session, error) {
 }
 
 // WriteCookie writes the provided session as a cookie to the provided writer
-func (s *SessionAgent) WriteCookie(sess *Session, w http.ResponseWriter) error {
+func (s *SessionAgent) WriteCookie(sess *models.Session, w http.ResponseWriter) error {
 	if sess == nil {
 		return errors.New("session is nil")
 	}
