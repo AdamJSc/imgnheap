@@ -4,20 +4,12 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"imgnheap/service/domain"
 	"imgnheap/service/models"
-	"os"
 	"testing"
 	"time"
 )
 
-type mockFileInfo struct {
-	os.FileInfo
-	name string
-}
-
-func (m mockFileInfo) Name() string { return m.name }
-
-func TestParseFileNameAndExtensionFromInfo(t *testing.T) {
-	t.Run("parsing file name and extension from file info must provided expected result", func(t *testing.T) {
+func TestParseNameAndExtensionFromFileName(t *testing.T) {
+	t.Run("parsing name and extension from filename must provided expected result", func(t *testing.T) {
 		testCases := []struct {
 			input          string
 			expectedOutput []string
@@ -35,9 +27,7 @@ func TestParseFileNameAndExtensionFromInfo(t *testing.T) {
 		}
 
 		for _, tc := range testCases {
-			info := mockFileInfo{name: tc.input}
-
-			fileName, ext := domain.ParseFileNameAndExtensionFromInfo(info)
+			fileName, ext := domain.ParseNameAndExtensionFromFileName(tc.input)
 			actualOutput := []string{fileName, ext}
 
 			diff := cmp.Diff(tc.expectedOutput, actualOutput)

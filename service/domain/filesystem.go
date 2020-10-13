@@ -53,7 +53,7 @@ func (o *OsFileSystem) GetFilesInDirectory(dirPath string) ([]models.File, error
 			return nil
 		}
 
-		fileName, ext := ParseFileNameAndExtensionFromInfo(info)
+		fileName, ext := ParseNameAndExtensionFromFileName(info.Name())
 
 		files = append(files, models.File{
 			Name:      fileName,
@@ -129,10 +129,9 @@ func (f *FileSystemAgent) ProcessFileByCopy(file models.File, destDir string) er
 	return nil
 }
 
-// ParseFileNameAndExtensionFromInfo returns the filename and extension from the provided file info object
-func ParseFileNameAndExtensionFromInfo(info os.FileInfo) (string, string) {
+// ParseNameAndExtensionFromFileName returns the name and extension from the provided filename string
+func ParseNameAndExtensionFromFileName(fileName string) (string, string) {
 	var ext string
-	fileName := info.Name()
 	fileNameParts := strings.Split(fileName, ".")
 
 	if len(fileNameParts) > 1 {
