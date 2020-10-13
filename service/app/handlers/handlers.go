@@ -90,8 +90,8 @@ func processFilesByDateInFilename(c app.Container) http.HandlerFunc {
 		}
 
 		for _, file := range files {
-			destDir := domain.GetDestinationDirFromFileTimestampAndSession(file, sess)
-			if err := fsAgent.ProcessFileByCopy(file, sess.BaseDir, destDir); err != nil {
+			destDir := domain.GetDestinationDirWithTimestamp(file, sess)
+			if err := fsAgent.ProcessFileByCopy(file, destDir); err != nil {
 				handleError(err, c, w)
 				return
 			}

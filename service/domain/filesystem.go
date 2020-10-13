@@ -3,6 +3,7 @@ package domain
 import (
 	"imgnheap/service/app"
 	"imgnheap/service/models"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -36,11 +37,19 @@ func (o *OsFileSystem) IsDirectory(path string) bool {
 func (o *OsFileSystem) GetFilesInDirectory(dirPath string) ([]models.File, error) {
 	var files []models.File
 
-	if err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
+	dirPath = path.Clean(dirPath)
+
+	if err := filepath.Walk(dirPath, func(filePath string, info os.FileInfo, err error) error {
 		if err != nil {
+			// an error has already occurred
 			return err
 		}
+		if path.Dir(filePath) != dirPath {
+			// we're beyond the first directory level, so return early
+			return nil
+		}
 		if info.IsDir() {
+			// we're only interested in files, so return early
 			return nil
 		}
 
@@ -49,6 +58,7 @@ func (o *OsFileSystem) GetFilesInDirectory(dirPath string) ([]models.File, error
 		files = append(files, models.File{
 			Name:      fileName,
 			Ext:       ext,
+			Directory: dirPath,
 			CreatedAt: info.ModTime(),
 		})
 
@@ -58,6 +68,29 @@ func (o *OsFileSystem) GetFilesInDirectory(dirPath string) ([]models.File, error
 	}
 
 	return files, nil
+}
+
+// Copy implements app.FileSystem.Copy()
+func (o *OsFileSystem) Copy(file models.File, destDir string) error {
+	src, err := os.Open(file.FullPath())
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	if err := os.MkdirAll(destDir, 0755); err != nil {
+		return err
+	}
+
+	destPath := path.Join(destDir, file.FilenameWithExt())
+	dest, err := os.Create(destPath)
+	if err != nil {
+		return err
+	}
+	defer dest.Close()
+
+	_, err = io.Copy(dest, src)
+	return err
 }
 
 // FileSystemAgentInjector defines the injector behaviours for our FileSystemAgent
@@ -88,9 +121,11 @@ func (f *FileSystemAgent) GetFilesFromDirectoryByExtension(dir string, exts ...s
 	return filtered, nil
 }
 
-// ProcessFileByCopy copies the provided file from the provided source directory to the provided destination directory
-func (f *FileSystemAgent) ProcessFileByCopy(file models.File, sourceDir, destDir string) error {
-	// TODO - implement me
+// ProcessFileByCopy copies the provided file to the provided destination directory
+func (f *FileSystemAgent) ProcessFileByCopy(file models.File, destDir string) error {
+	if err := f.FileSystem().Copy(file, destDir); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -154,8 +189,8 @@ func ParseTimestampFromFile(file models.File) time.Time {
 	return file.CreatedAt
 }
 
-// GetDestinationDirFromFileTimestampAndSession returns a directory based on the timestamp parsed from the provided file, and the provided session
-func GetDestinationDirFromFileTimestampAndSession(file models.File, sess *models.Session) string {
+// GetDestinationDirWithTimestamp returns a directory based on the timestamp parsed from the provided file
+func GetDestinationDirWithTimestamp(file models.File, sess *models.Session) string {
 	return path.Join(sess.FullDir(), ParseTimestampFromFile(file).Format("2006-01-02"))
 }
 

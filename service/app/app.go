@@ -26,4 +26,5 @@ type KeyValStore interface {
 type FileSystem interface {
 	IsDirectory(path string) bool
 	GetFilesInDirectory(path string) ([]models.File, error)
+	Copy(file models.File, dest string) error
 }
