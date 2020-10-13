@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"imgnheap/service/app"
 	"imgnheap/service/domain"
+	"imgnheap/service/models"
 	"imgnheap/service/views"
 	"net/http"
 	"time"
@@ -21,7 +22,7 @@ func newSessionHandler(c app.Container) http.HandlerFunc {
 		// get directory path from request
 		dirPath := r.FormValue("directory")
 		if dirPath == "" {
-			handleError(domain.BadRequestError{Err: errors.New("missing field: directory")}, c, w)
+			handleError(missingFieldError("directory"), c, w)
 			return
 		}
 
@@ -109,6 +110,53 @@ func processFilesByDateInFilename(c app.Container) http.HandlerFunc {
 	}
 }
 
+func controlPanelFileByTag(c app.Container) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// TODO - implement handler
+		w.Write([]byte("thing coming soon..."))
+	}
+}
+
+func processFileByTag(c app.Container) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		sess := getSessionFromRequest(r)
+		if sess == nil {
+			handleError(errors.New("session is nil"), c, w)
+			return
+		}
+
+		// get filename from request
+		fileName := r.FormValue("file_name")
+		if fileName == "" {
+			handleError(missingFieldError("file_name"), c, w)
+			return
+		}
+
+		// get tag from request
+		tag := r.FormValue("tag")
+		if tag == "" {
+			handleError(missingFieldError("tag"), c, w)
+			return
+		}
+
+		// instantiate file object
+		name, ext := domain.ParseNameAndExtensionFromFileName(fileName)
+		file := models.NewFile(name, ext, sess.BaseDir, time.Time{})
+
+		fsAgent := domain.FileSystemAgent{FileSystemAgentInjector: c}
+
+		// do the copy bit...
+		destDir := domain.GetDestinationDirWithTag(sess, tag)
+		if err := fsAgent.ProcessFileByCopy(file, destDir); err != nil {
+			handleError(err, c, w)
+			return
+		}
+
+		// redirect to control panel
+		redirect(w, "/catalog/by-tag")
+	}
+}
+
 // handleError handles the provided error and writes an appropriate error page
 func handleError(err error, c app.Container, w http.ResponseWriter) {
 	var code int
@@ -134,4 +182,11 @@ func handleError(err error, c app.Container, w http.ResponseWriter) {
 	data.Error.Detail = err.Error()
 
 	c.Templates().ExecuteTemplate(w, "error", data)
+}
+
+// missingFieldError returns a new BadRequestError based on the provided field name
+func missingFieldError(fieldName string) domain.BadRequestError {
+	return domain.BadRequestError{
+		Err: fmt.Errorf("missing field: %s", fieldName),
+	}
 }

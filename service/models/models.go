@@ -35,3 +35,13 @@ func (f File) FilenameWithExt() string {
 func (f File) FullPath() string {
 	return path.Join(f.Directory, f.FilenameWithExt())
 }
+
+// NewFile returns a new file object from the provided field values
+func NewFile(name, ext, directory string, createdAt time.Time) File {
+	return File{
+		Name:      name,
+		Ext:       ext,
+		Directory: directory,
+		CreatedAt: createdAt,
+	}
+}
