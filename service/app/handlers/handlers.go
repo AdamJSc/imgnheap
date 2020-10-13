@@ -98,7 +98,7 @@ func processFilesByDateInFilename(c app.Container) http.HandlerFunc {
 		}
 
 		for _, file := range files {
-			destDir := domain.GetDestinationDirWithTimestamp(file, sess)
+			destDir := domain.GetDestinationDirByDate(file, sess)
 			if err := fsAgent.ProcessFileByCopy(file, destDir); err != nil {
 				handleError(err, c, w)
 				return
@@ -146,7 +146,7 @@ func processFileByTag(c app.Container) http.HandlerFunc {
 		fsAgent := domain.FileSystemAgent{FileSystemAgentInjector: c}
 
 		// do the copy bit...
-		destDir := domain.GetDestinationDirWithTag(sess, tag)
+		destDir := domain.GetDestinationDirByTag(sess, tag)
 		if err := fsAgent.ProcessFileByCopy(file, destDir); err != nil {
 			handleError(err, c, w)
 			return

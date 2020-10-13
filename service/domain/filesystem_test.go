@@ -136,80 +136,80 @@ func TestParseTimestampFromFile(t *testing.T) {
 	})
 }
 
-func TestGetDestinationDirWithTimestamp(t *testing.T) {
+func TestGetDestinationDirByDate(t *testing.T) {
 	sess := models.Session{
 		BaseDir: "/base/dir",
 		SubDir:  "subdir",
 	}
 
-	t.Run("get destination dir with timestamp using a timestamp-parseable filename must return the expected result", func(t *testing.T) {
+	t.Run("get destination dir by date using a filename that contains a parseable timestamp must return the expected result", func(t *testing.T) {
 		testCases := fileNamesContainingParseableTimestamp
 
-		expectedOutput := "/base/dir/subdir/2018-05-26"
+		expectedOutput := "/base/dir/subdir/by-date/2018-05-26"
 
 		for idx, tc := range testCases {
 			file := models.NewFile(tc, "jpg", "/base/dir", time.Time{})
 
-			destDir := domain.GetDestinationDirWithTimestamp(file, &sess)
+			destDir := domain.GetDestinationDirByDate(file, &sess)
 			if destDir != expectedOutput {
 				t.Fatalf("tc %d: expected %s, got %s", idx, expectedOutput, destDir)
 			}
 		}
 	})
 
-	t.Run("get destination dir with timestamp using a non-timestamp-parseable filename must return the expected result", func(t *testing.T) {
+	t.Run("get destination dir by date using a filename that does not contain a parseable timestamp must return the expected result", func(t *testing.T) {
 		testCases := fileNamesContainingNoParseableTimestamp
 
-		expectedOutput := "/base/dir/subdir/0001-01-01"
+		expectedOutput := "/base/dir/subdir/by-date/0001-01-01"
 
 		for idx, tc := range testCases {
 			file := models.NewFile(tc, "jpg", "/base/dir", time.Time{})
 
-			destDir := domain.GetDestinationDirWithTimestamp(file, &sess)
+			destDir := domain.GetDestinationDirByDate(file, &sess)
 			if destDir != expectedOutput {
 				t.Fatalf("tc %d: expected %s, got %s", idx, expectedOutput, destDir)
 			}
 		}
 	})
 
-	t.Run("get destination dir with timestamp using nil session must return blank string", func(t *testing.T) {
+	t.Run("get destination dir by date using nil session must return blank string", func(t *testing.T) {
 		file := models.NewFile("hello_world", "jpg", "/base/dir", time.Time{})
 
-		destDir := domain.GetDestinationDirWithTimestamp(file, nil)
+		destDir := domain.GetDestinationDirByDate(file, nil)
 		if destDir != "" {
 			t.Fatalf("expected empty string, got %s", destDir)
 		}
 	})
 }
 
-func TestGetDestinationDirWithTag(t *testing.T) {
+func TestGetDestinationDirByTag(t *testing.T) {
 	sess := models.Session{
 		BaseDir: "/base/dir",
 		SubDir:  "subdir",
 	}
 
-	t.Run("get destination dir with tag must return the expected result", func(t *testing.T) {
+	t.Run("get destination dir by tag must return the expected result", func(t *testing.T) {
 		testCases := []struct {
 			input          string
 			expectedOutput string
 		}{
-			{input: "helloWorld", expectedOutput: "/base/dir/subdir/helloWorld"},
-			{input: "hello-world", expectedOutput: "/base/dir/subdir/hello-world"},
-			{input: "hello_world", expectedOutput: "/base/dir/subdir/hello_world"},
-			{input: "hello/world", expectedOutput: "/base/dir/subdir/hello/world"},
-			{input: "hello/world//", expectedOutput: "/base/dir/subdir/hello/world"},
+			{input: "helloWorld", expectedOutput: "/base/dir/subdir/by-tag/helloWorld"},
+			{input: "hello-world", expectedOutput: "/base/dir/subdir/by-tag/hello-world"},
+			{input: "hello_world", expectedOutput: "/base/dir/subdir/by-tag/hello_world"},
+			{input: "hello/world", expectedOutput: "/base/dir/subdir/by-tag/hello/world"},
+			{input: "hello/world//", expectedOutput: "/base/dir/subdir/by-tag/hello/world"},
 		}
 
 		for idx, tc := range testCases {
-			destDir := domain.GetDestinationDirWithTag(&sess, tc.input)
+			destDir := domain.GetDestinationDirByTag(&sess, tc.input)
 			if destDir != tc.expectedOutput {
 				t.Fatalf("tc %d: expected %s, got %s", idx, tc.expectedOutput, destDir)
 			}
 		}
 	})
 
-	t.Run("get destination dir with tag using nil session must return blank string", func(t *testing.T) {
-		destDir := domain.GetDestinationDirWithTag(nil, "helloWorld")
+	t.Run("get destination dir by tag using nil session must return blank string", func(t *testing.T) {
+		destDir := domain.GetDestinationDirByTag(nil, "helloWorld")
 		if destDir != "" {
 			t.Fatalf("expected empty string, got %s", destDir)
 		}

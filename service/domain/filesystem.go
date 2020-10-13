@@ -182,22 +182,22 @@ func ParseTimestampFromFile(file models.File) time.Time {
 	return file.CreatedAt
 }
 
-// GetDestinationDirWithTimestamp returns a directory path based on the timestamp parsed from the provided file
-func GetDestinationDirWithTimestamp(file models.File, sess *models.Session) string {
+// GetDestinationDirByDate returns a directory path based on the timestamp parsed from the provided file
+func GetDestinationDirByDate(file models.File, sess *models.Session) string {
 	if sess == nil {
 		return ""
 	}
 
-	return path.Join(sess.FullDir(), ParseTimestampFromFile(file).Format("2006-01-02"))
+	return path.Join(sess.FullDir(), "by-date", ParseTimestampFromFile(file).Format("2006-01-02"))
 }
 
-// GetDestinationDirWithTag returns a directory path based on the provided session and tag
-func GetDestinationDirWithTag(sess *models.Session, tag string) string {
+// GetDestinationDirByTag returns a directory path based on the provided session and tag
+func GetDestinationDirByTag(sess *models.Session, tag string) string {
 	if sess == nil {
 		return ""
 	}
 
-	return path.Join(sess.FullDir(), tag)
+	return path.Join(sess.FullDir(), "by-tag", tag)
 }
 
 // contains returns true if the provided needle exists within the provided haystack, otherwise false
