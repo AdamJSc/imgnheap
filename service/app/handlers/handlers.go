@@ -18,10 +18,17 @@ func indexHandler(c app.Container) http.HandlerFunc {
 
 func newSessionHandler(c app.Container) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// get directory path from request
+		dirPath := r.FormValue("directory")
+		if dirPath == "" {
+			handleError(domain.BadRequestError{Err: errors.New("missing field: directory")}, c, w)
+			return
+		}
+
 		sessAgent := domain.SessionAgent{SessionAgentInjector: c}
 
 		// save new session
-		sess, err := sessAgent.NewSessionFromRequestAndTimestamp(r, time.Now())
+		sess, err := sessAgent.NewSessionFromDirectoryAndTimestamp(dirPath, time.Now())
 		if err != nil {
 			handleError(err, c, w)
 			return

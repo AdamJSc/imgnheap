@@ -23,14 +23,8 @@ type SessionAgent struct {
 	SessionAgentInjector
 }
 
-// NewSessionFromRequestAndTimestamp generates a new session based on the provided request object and timestamp, and returns the session
-func (s *SessionAgent) NewSessionFromRequestAndTimestamp(r *http.Request, ts time.Time) (*models.Session, error) {
-	// get directory path from request
-	dirPath := r.FormValue("directory")
-	if dirPath == "" {
-		return nil, BadRequestError{Err: errors.New("missing field: directory")}
-	}
-
+// NewSessionFromDirectoryAndTimestamp generates a new session based on the provided directory path and timestamp, and returns the session
+func (s *SessionAgent) NewSessionFromDirectoryAndTimestamp(dirPath string, ts time.Time) (*models.Session, error) {
 	// does directory exist?
 	if !s.FileSystem().IsDirectory(dirPath) {
 		return nil, ValidationError{Err: fmt.Errorf("not a directory: %s", dirPath)}
