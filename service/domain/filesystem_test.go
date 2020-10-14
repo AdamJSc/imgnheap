@@ -148,7 +148,7 @@ func TestGetDestinationDirByDate(t *testing.T) {
 		expectedOutput := "/base/dir/subdir/by-date/2018-05-26"
 
 		for idx, tc := range testCases {
-			file := models.NewFile(tc, "jpg", "/base/dir", time.Time{})
+			file := models.NewFile(tc, "jpg", "/base/dir", nil)
 
 			destDir := domain.GetDestinationDirByDate(file, &sess)
 			if destDir != expectedOutput {
@@ -163,7 +163,7 @@ func TestGetDestinationDirByDate(t *testing.T) {
 		expectedOutput := "/base/dir/subdir/by-date/0001-01-01"
 
 		for idx, tc := range testCases {
-			file := models.NewFile(tc, "jpg", "/base/dir", time.Time{})
+			file := models.NewFile(tc, "jpg", "/base/dir", nil)
 
 			destDir := domain.GetDestinationDirByDate(file, &sess)
 			if destDir != expectedOutput {
@@ -173,7 +173,7 @@ func TestGetDestinationDirByDate(t *testing.T) {
 	})
 
 	t.Run("get destination dir by date using nil session must return blank string", func(t *testing.T) {
-		file := models.NewFile("hello_world", "jpg", "/base/dir", time.Time{})
+		file := models.NewFile("hello_world", "jpg", "/base/dir", nil)
 
 		destDir := domain.GetDestinationDirByDate(file, nil)
 		if destDir != "" {

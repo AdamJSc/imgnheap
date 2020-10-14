@@ -68,7 +68,7 @@ type CatalogMethodSelectionPage struct {
 type CatalogByTagPage struct {
 	Page
 	ImageFilesCount int
-	ImageFilePath   string
+	ImageFileName   string
 	TagsWithCount   map[string]int
 }
 

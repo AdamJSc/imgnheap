@@ -3,10 +3,12 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"github.com/gorilla/mux"
 	"imgnheap/service/app"
 	"imgnheap/service/domain"
 	"imgnheap/service/models"
 	"imgnheap/service/views"
+	"log"
 	"net/http"
 	"time"
 )
@@ -151,7 +153,7 @@ func catalogByTag(c app.Container) http.HandlerFunc {
 		}
 
 		// get next file to be processed
-		data.ImageFilePath = files[0].FullPath()
+		data.ImageFileName = files[0].FilenameWithExt()
 
 		// TODO - get tags (subfolders) and file counts within each one
 
@@ -183,7 +185,7 @@ func processFileByTag(c app.Container) http.HandlerFunc {
 
 		// instantiate file object
 		name, ext := domain.ParseNameAndExtensionFromFileName(fileName)
-		file := models.NewFile(name, ext, sess.BaseDir, time.Time{})
+		file := models.NewFile(name, ext, sess.BaseDir, nil)
 
 		fsAgent := domain.FileSystemAgent{FileSystemAgentInjector: c}
 
@@ -199,22 +201,49 @@ func processFileByTag(c app.Container) http.HandlerFunc {
 	}
 }
 
+func renderFile(c app.Container) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		sess := getSessionFromRequest(r)
+		if sess == nil {
+			handleError(errors.New("session is nil"), c, w)
+			return
+		}
+
+		var fileName string
+		if err := routeParam(&fileName, "filename", r); err != nil {
+			handleError(err, c, w)
+			return
+		}
+
+		name, ext := domain.ParseNameAndExtensionFromFileName(fileName)
+		file := models.NewFile(name, ext, sess.BaseDir, nil)
+
+		fsAgent := domain.FileSystemAgent{FileSystemAgentInjector: c}
+
+		err := fsAgent.Stream(file, w)
+		if err != nil {
+			w.WriteHeader(getResponseStatusFromError(err))
+			log.Println(err)
+		}
+	}
+}
+
 // handleError handles the provided error and writes an appropriate error page
 func handleError(err error, c app.Container, w http.ResponseWriter) {
-	var code int
 	var msg string
 
 	switch err.(type) {
 	case domain.BadRequestError:
-		code = http.StatusBadRequest
 		msg = "Bad Request"
+	case domain.NotFoundError:
+		msg = "Not Found"
 	case domain.ValidationError:
-		code = http.StatusUnprocessableEntity
 		msg = "Unprocessable Entity"
 	default:
-		code = http.StatusInternalServerError
 		msg = "Internal Server Error"
 	}
+
+	code := getResponseStatusFromError(err)
 
 	data := views.ErrorPage{
 		Page: views.NewPage(msg, "", true),
@@ -227,9 +256,42 @@ func handleError(err error, c app.Container, w http.ResponseWriter) {
 	c.Templates().ExecuteTemplate(w, "error", data)
 }
 
+// getResponseStatusFromError returns a numeric response status code from the provided error
+func getResponseStatusFromError(err error) int {
+	switch err.(type) {
+	case domain.BadRequestError:
+		return http.StatusBadRequest
+	case domain.NotFoundError:
+		return http.StatusNotFound
+	case domain.ValidationError:
+		return http.StatusUnprocessableEntity
+	default:
+		return http.StatusInternalServerError
+	}
+}
+
 // missingFieldError returns a new BadRequestError based on the provided field name
 func missingFieldError(fieldName string) domain.BadRequestError {
 	return domain.BadRequestError{
 		Err: fmt.Errorf("missing field: %s", fieldName),
 	}
+}
+
+// routeParam loads the value of the provided route parameter from the provided request object into the provided recipient variable
+func routeParam(p *string, name string, r *http.Request) error {
+	if p == nil {
+		return errors.New("parameter is nil")
+	}
+	if r == nil {
+		return errors.New("request is nil")
+	}
+
+	vars := mux.Vars(r)
+	val, ok := vars[name]
+	if !ok {
+		return fmt.Errorf("param %s not found", name)
+	}
+
+	*p = val
+	return nil
 }

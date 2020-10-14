@@ -4,9 +4,12 @@ import (
 	"imgnheap/service/app"
 	"imgnheap/service/models"
 	"io"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -54,7 +57,8 @@ func (o *OsFileSystem) GetFilesInDirectory(dirPath string) ([]models.File, error
 		}
 
 		fileName, ext := ParseNameAndExtensionFromFileName(info.Name())
-		files = append(files, models.NewFile(fileName, ext, dirPath, info.ModTime()))
+		modTime := info.ModTime()
+		files = append(files, models.NewFile(fileName, ext, dirPath, &modTime))
 
 		return nil
 	}); err != nil {
@@ -62,6 +66,19 @@ func (o *OsFileSystem) GetFilesInDirectory(dirPath string) ([]models.File, error
 	}
 
 	return files, nil
+}
+
+// GetContents implements app.FileSystem.GetContents()
+func (o *OsFileSystem) GetContents(file models.File) ([]byte, error) {
+	contents, err := ioutil.ReadFile(file.FullPath())
+
+	if err != nil {
+		// presume this means the file can't be found for all intents and purposes
+		// for granular control, look to determine the exact nature of the error message first
+		return nil, NotFoundError{Err: err}
+	}
+
+	return contents, nil
 }
 
 // Copy implements app.FileSystem.Copy()
@@ -125,6 +142,21 @@ func (f *FileSystemAgent) ProcessFileByCopy(file models.File, destDir string) er
 	if err := f.FileSystem().Copy(file, destDir); err != nil {
 		return err
 	}
+	return nil
+}
+
+// Stream writes the contents of the provided file to the provided response writer
+func (f *FileSystemAgent) Stream(file models.File, w http.ResponseWriter) error {
+	contents, err := f.FileSystem().GetContents(file)
+	if err != nil {
+		return err
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", http.DetectContentType(contents))
+	w.Header().Set("Content-Length", strconv.Itoa(len(contents)))
+	w.Write(contents)
+
 	return nil
 }
 

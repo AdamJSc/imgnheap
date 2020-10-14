@@ -37,11 +37,14 @@ func (f File) FullPath() string {
 }
 
 // NewFile returns a new file object from the provided field values
-func NewFile(name, ext, directory string, createdAt time.Time) File {
-	return File{
+func NewFile(name, ext, directory string, createdAt *time.Time) File {
+	file := File{
 		Name:      name,
 		Ext:       ext,
 		Directory: directory,
-		CreatedAt: createdAt,
 	}
+	if createdAt != nil {
+		file.CreatedAt = *createdAt
+	}
+	return file
 }

@@ -21,6 +21,7 @@ func RegisterRouter(c app.Container) *mux.Router {
 	s.HandleFunc("/catalog/by-date", processFilesByDateInFilename(c)).Methods(http.MethodPost)
 	s.HandleFunc("/catalog/by-tag", catalogByTag(c)).Methods(http.MethodGet)
 	s.HandleFunc("/catalog/by-tag", processFileByTag(c)).Methods(http.MethodPost)
+	s.HandleFunc("/file/{filename}", renderFile(c)).Methods(http.MethodGet)
 	s.HandleFunc("/reset", resetHandler(c)).Methods(http.MethodPost)
 
 	return r
