@@ -19,7 +19,7 @@ func RegisterRouter(c app.Container) *mux.Router {
 	s.Use(addSessionToRequestContext(c))
 	s.HandleFunc("/catalog", catalogMethodSelectionHandler(c)).Methods(http.MethodGet)
 	s.HandleFunc("/catalog/by-date", processFilesByDateInFilename(c)).Methods(http.MethodPost)
-	s.HandleFunc("/catalog/by-tag", controlPanelFileByTag(c)).Methods(http.MethodGet)
+	s.HandleFunc("/catalog/by-tag", catalogByTag(c)).Methods(http.MethodGet)
 	s.HandleFunc("/catalog/by-tag", processFileByTag(c)).Methods(http.MethodPost)
 	s.HandleFunc("/reset", resetHandler(c)).Methods(http.MethodPost)
 

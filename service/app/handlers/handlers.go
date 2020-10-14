@@ -13,7 +13,11 @@ import (
 
 func indexHandler(c app.Container) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		c.Templates().ExecuteTemplate(w, "index", views.IndexPage{Page: views.NewPage("Enter your directory", "", false)})
+		data := views.IndexPage{Page: views.NewPage("Enter your directory", "", false)}
+
+		if err := c.Templates().ExecuteTemplate(w, "index", data); err != nil {
+			handleError(err, c, w)
+		}
 	}
 }
 
@@ -68,7 +72,9 @@ func catalogMethodSelectionHandler(c app.Container) http.HandlerFunc {
 			ImageFilesCount: len(imgFiles),
 		}
 
-		c.Templates().ExecuteTemplate(w, "catalog-method-selection", data)
+		if err := c.Templates().ExecuteTemplate(w, "catalog-method-selection", data); err != nil {
+			handleError(err, c, w)
+		}
 	}
 }
 
@@ -110,7 +116,7 @@ func processFilesByDateInFilename(c app.Container) http.HandlerFunc {
 	}
 }
 
-func controlPanelFileByTag(c app.Container) http.HandlerFunc {
+func catalogByTag(c app.Container) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// TODO - implement handler
 		w.Write([]byte("thing coming soon..."))
