@@ -58,10 +58,18 @@ type IndexPage struct {
 	Page
 }
 
-// CatalogMethodSelectionPage represents the dataset required by the catalog method seleciton page
+// CatalogMethodSelectionPage represents the dataset required by the catalog method selection page
 type CatalogMethodSelectionPage struct {
 	Page
 	ImageFilesCount int
+}
+
+// CatalogByTagPage represents the dataset required by the catalog by tag page
+type CatalogByTagPage struct {
+	Page
+	ImageFilesCount int
+	ImageFilePath   string
+	TagsWithCount   map[string]int
 }
 
 // ErrorPage represents the dataset required by an error page

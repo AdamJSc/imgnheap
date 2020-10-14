@@ -104,6 +104,11 @@ func (f *FileSystemAgent) GetFilesFromDirectoryByExtension(dir string, exts ...s
 		return nil, err
 	}
 
+	if len(exts) == 0 {
+		// no filtering required
+		return files, nil
+	}
+
 	var filtered []models.File
 
 	for _, file := range files {

@@ -118,8 +118,44 @@ func processFilesByDateInFilename(c app.Container) http.HandlerFunc {
 
 func catalogByTag(c app.Container) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// TODO - implement handler
-		w.Write([]byte("thing coming soon..."))
+		// define reusable method for writing output
+		var writeResponse = func(data interface{}) {
+			if err := c.Templates().ExecuteTemplate(w, "catalog-by-tag", data); err != nil {
+				handleError(err, c, w)
+			}
+		}
+
+		fsAgent := domain.FileSystemAgent{FileSystemAgentInjector: c}
+
+		sess := getSessionFromRequest(r)
+		if sess == nil {
+			handleError(errors.New("session is nil"), c, w)
+			return
+		}
+		dirPath := sess.BaseDir
+
+		data := views.CatalogByTagPage{
+			Page: views.NewPage("Catalog image by tag", dirPath, dirPath != ""),
+		}
+
+		// see if we have any more files that need to be processed
+		files, err := fsAgent.GetFilesFromDirectoryByExtension(dirPath, domain.ImgFileExts...)
+		if err != nil {
+			handleError(err, c, w)
+			return
+		}
+		data.ImageFilesCount = len(files)
+		if data.ImageFilesCount == 0 {
+			writeResponse(data)
+			return
+		}
+
+		// get next file to be processed
+		data.ImageFilePath = files[0].FullPath()
+
+		// TODO - get tags (subfolders) and file counts within each one
+
+		writeResponse(data)
 	}
 }
 
@@ -187,6 +223,7 @@ func handleError(err error, c app.Container, w http.ResponseWriter) {
 	data.Error.Message = msg
 	data.Error.Detail = err.Error()
 
+	w.WriteHeader(code)
 	c.Templates().ExecuteTemplate(w, "error", data)
 }
 
