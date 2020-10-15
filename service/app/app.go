@@ -28,4 +28,5 @@ type FileSystem interface {
 	GetFilesInDirectory(path string) ([]models.File, error)
 	GetContents(file models.File) ([]byte, error)
 	Copy(file models.File, dest string) error
+	Move(file models.File, dest string) error
 }

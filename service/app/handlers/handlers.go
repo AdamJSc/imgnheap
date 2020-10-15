@@ -189,9 +189,9 @@ func processFileByTag(c app.Container) http.HandlerFunc {
 
 		fsAgent := domain.FileSystemAgent{FileSystemAgentInjector: c}
 
-		// do the copy bit...
+		// do the move bit...
 		destDir := domain.GetDestinationDirByTag(sess, tag)
-		if err := fsAgent.ProcessFileByCopy(file, destDir); err != nil {
+		if err := fsAgent.ProcessFileByMove(file, destDir); err != nil {
 			handleError(err, c, w)
 			return
 		}

@@ -104,6 +104,21 @@ func (o *OsFileSystem) Copy(file models.File, destDir string) error {
 	return err
 }
 
+// Move implements app.FileSystem.Move()
+func (o *OsFileSystem) Move(file models.File, destDir string) error {
+	// copy file
+	if err := o.Copy(file, destDir); err != nil {
+		return err
+	}
+
+	// delete original
+	if err := os.Remove(file.FullPath()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // FileSystemAgentInjector defines the injector behaviours for our FileSystemAgent
 type FileSystemAgentInjector interface {
 	app.FileSystemInjector
@@ -140,6 +155,14 @@ func (f *FileSystemAgent) GetFilesFromDirectoryByExtension(dir string, exts ...s
 // ProcessFileByCopy copies the provided file to the provided destination directory
 func (f *FileSystemAgent) ProcessFileByCopy(file models.File, destDir string) error {
 	if err := f.FileSystem().Copy(file, destDir); err != nil {
+		return err
+	}
+	return nil
+}
+
+// ProcessFileByMove moves the provided file to the provided destination directory
+func (f *FileSystemAgent) ProcessFileByMove(file models.File, destDir string) error {
+	if err := f.FileSystem().Move(file, destDir); err != nil {
 		return err
 	}
 	return nil
