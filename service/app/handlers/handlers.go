@@ -156,7 +156,7 @@ func catalogByTag(c app.Container) http.HandlerFunc {
 		data.ImageFileName = files[0].NameWithExt()
 
 		data.TagsWithCount = make(map[string]int)
-		dirs, err := fsAgent.GetDirectoriesWithFileCountByExtension(dirPath, domain.ImgFileExts...)
+		dirs, err := fsAgent.GetDirectoriesWithFileCountByExtension(sess.FullDir(domain.SubDirByTag), domain.ImgFileExts...)
 		for _, dir := range dirs {
 			data.TagsWithCount[dir.Name] = dir.FileCount
 		}

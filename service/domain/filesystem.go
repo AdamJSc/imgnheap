@@ -14,6 +14,11 @@ import (
 	"time"
 )
 
+const (
+	SubDirByDate = "by-date"
+	SubDirByTag  = "by-tag"
+)
+
 var ImgFileExts = []string{
 	"png",
 	"jpg",
@@ -303,7 +308,7 @@ func GetDestinationDirByDate(file models.File, sess *models.Session) string {
 		return ""
 	}
 
-	return path.Join(sess.FullDir(), "by-date", ParseTimestampFromFile(file).Format("2006-01-02"))
+	return path.Join(sess.FullDir(SubDirByDate), file.Ext, ParseTimestampFromFile(file).Format("2006-01-02"))
 }
 
 // GetDestinationDirByTag returns a directory path based on the provided session and tag
@@ -312,7 +317,7 @@ func GetDestinationDirByTag(sess *models.Session, tag string) string {
 		return ""
 	}
 
-	return path.Join(sess.FullDir(), "by-tag", tag)
+	return path.Join(sess.FullDir(SubDirByTag), tag)
 }
 
 // contains returns true if the provided needle exists within the provided haystack, otherwise false

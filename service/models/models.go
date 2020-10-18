@@ -14,8 +14,8 @@ type Session struct {
 }
 
 // FullDir returns the full directory stored by the Session
-func (s *Session) FullDir() string {
-	return path.Join(s.BaseDir, s.SubDir)
+func (s *Session) FullDir(subs ...string) string {
+	return path.Join(s.BaseDir, s.SubDir, path.Join(subs...))
 }
 
 // File represents a single file
