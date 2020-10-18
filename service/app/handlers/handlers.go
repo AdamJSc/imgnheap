@@ -153,9 +153,13 @@ func catalogByTag(c app.Container) http.HandlerFunc {
 		}
 
 		// get next file to be processed
-		data.ImageFileName = files[0].FilenameWithExt()
+		data.ImageFileName = files[0].NameWithExt()
 
-		// TODO - get tags (subfolders) and file counts within each one
+		data.TagsWithCount = make(map[string]int)
+		dirs, err := fsAgent.GetDirectoriesWithFileCountByExtension(dirPath, domain.ImgFileExts...)
+		for _, dir := range dirs {
+			data.TagsWithCount[dir.Name] = dir.FileCount
+		}
 
 		writeResponse(data)
 	}

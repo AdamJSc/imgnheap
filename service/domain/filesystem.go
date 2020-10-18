@@ -68,6 +68,41 @@ func (o *OsFileSystem) GetFilesInDirectory(dirPath string) ([]models.File, error
 	return files, nil
 }
 
+// GetDirectoriesInDirectory implements app.FileSystem.GetDirectoriesInDirectory()
+func (o *OsFileSystem) GetDirectoriesInDirectory(dirPath string) ([]models.Directory, error) {
+	var dirs []models.Directory
+
+	dirPath = path.Clean(dirPath)
+
+	if err := filepath.Walk(dirPath, func(filePath string, info os.FileInfo, err error) error {
+		if err != nil {
+			// an error has already occurred
+			return err
+		}
+		if path.Dir(filePath) != dirPath {
+			// we're beyond the first directory level, so return early
+			return nil
+		}
+		if !info.IsDir() {
+			// we're only interested in directories, so return early
+			return nil
+		}
+
+		dir := models.Directory{
+			Name:    info.Name(),
+			DirPath: dirPath,
+		}
+
+		dirs = append(dirs, dir)
+
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return dirs, nil
+}
+
 // GetContents implements app.FileSystem.GetContents()
 func (o *OsFileSystem) GetContents(file models.File) ([]byte, error) {
 	contents, err := ioutil.ReadFile(file.FullPath())
@@ -93,7 +128,7 @@ func (o *OsFileSystem) Copy(file models.File, destDir string) error {
 		return err
 	}
 
-	destPath := path.Join(destDir, file.FilenameWithExt())
+	destPath := path.Join(destDir, file.NameWithExt())
 	dest, err := os.Create(destPath)
 	if err != nil {
 		return err
@@ -181,6 +216,26 @@ func (f *FileSystemAgent) Stream(file models.File, w http.ResponseWriter) error 
 	w.Write(contents)
 
 	return nil
+}
+
+// GetDirectoriesWithFileCountByExtension returns a slice of the directories present within the provided directory path
+// including the count of files within each one that has one of the provided extensions
+func (f *FileSystemAgent) GetDirectoriesWithFileCountByExtension(dir string, exts ...string) ([]models.Directory, error) {
+	dirs, err := f.FileSystem().GetDirectoriesInDirectory(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	for idx := range dirs {
+		files, err := f.GetFilesFromDirectoryByExtension(dirs[idx].FullPath(), exts...)
+		if err != nil {
+			return nil, err
+		}
+
+		dirs[idx].FileCount = len(files)
+	}
+
+	return dirs, nil
 }
 
 // ParseNameAndExtensionFromFileName returns the name and extension from the provided filename string

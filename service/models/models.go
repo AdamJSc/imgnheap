@@ -22,29 +22,41 @@ func (s *Session) FullDir() string {
 type File struct {
 	Name      string
 	Ext       string
-	Directory string
+	DirPath   string
 	CreatedAt time.Time
 }
 
-// FilenameWithExt returns the filename and extension of the associated file
-func (f File) FilenameWithExt() string {
+// NameWithExt returns the filename and extension of the associated file
+func (f File) NameWithExt() string {
 	return fmt.Sprintf("%s.%s", f.Name, f.Ext)
 }
 
 // FullPath returns the full path of the associated file
 func (f File) FullPath() string {
-	return path.Join(f.Directory, f.FilenameWithExt())
+	return path.Join(f.DirPath, f.NameWithExt())
 }
 
 // NewFile returns a new file object from the provided field values
 func NewFile(name, ext, directory string, createdAt *time.Time) File {
 	file := File{
-		Name:      name,
-		Ext:       ext,
-		Directory: directory,
+		Name:    name,
+		Ext:     ext,
+		DirPath: directory,
 	}
 	if createdAt != nil {
 		file.CreatedAt = *createdAt
 	}
 	return file
+}
+
+// Directory represents a single directory
+type Directory struct {
+	Name      string
+	DirPath   string
+	FileCount int
+}
+
+// FullPath returns the full path of the associated directory
+func (d Directory) FullPath() string {
+	return path.Join(d.DirPath, d.Name)
 }
