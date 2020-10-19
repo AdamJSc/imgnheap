@@ -113,8 +113,13 @@ func processFilesByDateInFilename(c app.Container) http.HandlerFunc {
 			}
 		}
 
-		// TODO - execute template
-		w.Write([]byte(fmt.Sprintf("processed %d files in %s", len(files), sess.FullDir())))
+		data := views.ProcessedByDatePage{
+			Page:              views.NewPage("Finished Processing By Date", sess.BaseDir, true),
+			CompletionMessage: fmt.Sprintf("%d files in %s", len(files), sess.FullDir()),
+		}
+		if err := c.Templates().ExecuteTemplate(w, "processed-by-date", data); err != nil {
+			handleError(err, c, w)
+		}
 	}
 }
 
@@ -148,6 +153,7 @@ func catalogByTag(c app.Container) http.HandlerFunc {
 		}
 		data.ImageFilesCount = len(files)
 		if data.ImageFilesCount == 0 {
+			data.CompletionMessage = "Done all the images"
 			writeResponse(data)
 			return
 		}

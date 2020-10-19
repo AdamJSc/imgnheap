@@ -1,7 +1,9 @@
 {{define "catalog-by-tag"}}
     {{template "partial.header" .}}
     <div class="content catalog-by-tag">
-        {{if .ImageFilesCount}}
+        {{if .CompletionMessage}}
+            {{template "partial.completion" .CompletionMessage}}
+        {{else}}
             <p class="bold">{{.DirPath}}</p>
             <p>{{.ImageFilesCount}} image file(s) left to process...</p>
             <p class="bold">{{.ImageFileName}}</p>
@@ -28,11 +30,7 @@
                     </form>
                 </div>
             </div>
-        {{else}}
-            <h1>Done!</h1>
-            <!-- TODO - aesthetics -->
         {{end}}
-
     </div>
     {{template "partial.footer" .}}
 {{end}}

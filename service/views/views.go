@@ -67,9 +67,16 @@ type CatalogMethodSelectionPage struct {
 // CatalogByTagPage represents the dataset required by the catalog by tag page
 type CatalogByTagPage struct {
 	Page
-	ImageFilesCount int
-	ImageFileName   string
-	TagsWithCount   map[string]int
+	ImageFilesCount   int
+	ImageFileName     string
+	TagsWithCount     map[string]int
+	CompletionMessage string
+}
+
+// ProcessedByDatePage represents the dataset required by the processed by date page
+type ProcessedByDatePage struct {
+	Page
+	CompletionMessage string
 }
 
 // ErrorPage represents the dataset required by an error page
