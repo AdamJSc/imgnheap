@@ -153,7 +153,7 @@ func catalogByTag(c app.Container) http.HandlerFunc {
 		}
 		data.ImageFilesCount = len(files)
 		if data.ImageFilesCount == 0 {
-			data.CompletionMessage = "Done all the images"
+			data.CompletionMessage = "Done all the images!"
 			writeResponse(data)
 			return
 		}

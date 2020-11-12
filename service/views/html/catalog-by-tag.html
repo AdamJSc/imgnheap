@@ -8,27 +8,35 @@
             <p>{{.ImageFilesCount}} image file(s) left to process...</p>
             <p class="bold">{{.ImageFileName}}</p>
             <h1>Give it a tag...</h1>
-            <div class="image-container">
-                <img src="/file/{{.ImageFileName}}">
-            </div>
             <div class="tag-container">
-                {{$imageFileName := .ImageFileName}}
-                {{range $tag, $count := .TagsWithCount}}
-                    <div class="tag-wrapper">
-                        <form method="post">
-                            <input type="hidden" name="file_name" value="{{$imageFileName}}" />
-                            <input type="hidden" name="tag" value="{{$tag}}" />
-                            <button type="submit" class="cta">{{$tag}} [{{$count}}]</button>
-                        </form>
-                    </div>
-                {{end}}
+                <div class="tag-wrapper-outer">
+                    {{$imageFileName := .ImageFileName}}
+                    {{range $tag, $count := .TagsWithCount}}
+                        <div class="tag-wrapper">
+                            <form method="post">
+                                <input type="hidden" name="file_name" value="{{$imageFileName}}" />
+                                <input type="hidden" name="tag" value="{{$tag}}" />
+                                <button type="submit" class="cta">{{$tag}} [{{$count}}]</button>
+                            </form>
+                        </div>
+                    {{end}}
+                </div>
                 <div class="tag-wrapper custom">
                     <form method="post">
                         <input type="hidden" name="file_name" value="{{.ImageFileName}}" />
-                        <input type="text" name="tag" value="" placeholder="Custom..." />
-                        <button type="submit" class="cta">Tag</button>
+                        <div class="input-container text">
+                            <input type="text" name="tag" value="" placeholder="Custom..." />
+                        </div>
+                        <div class="input-container button">
+                            <button type="submit" class="cta">Tag</button>
+                        </div>
                     </form>
                 </div>
+            </div>
+            <div class="image-container">
+                <a target="_blank" href="/file/{{.ImageFileName}}">
+                    <img src="/file/{{.ImageFileName}}">
+                </a>
             </div>
         {{end}}
     </div>
